@@ -1,0 +1,66 @@
+# References
+#   - cassandra: https://github.com/jaegertracing/jaeger/blob/main/docker-compose/cassandra/v5/docker-compose.yaml
+#   - jaeger: https://github.com/jaegertracing/jaeger/blob/main/examples/hotrod/docker-compose.yml
+# Date: 8 April, 2025
+
+services:
+  cassandra:
+    image: ${CASSANDRA_IMG:-cassandra:5.0.3}
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    # We enable password authentication that defaults to cassandra/cassandra superuser / pwd.
+    # https://cassandra.apache.org/doc/stable/cassandra/operating/security.html#authentication
+    command: >
+      /bin/sh -c "echo 'authenticator: PasswordAuthenticator' >> /etc/cassandra/cassandra.yaml && docker-entrypoint.sh cassandra -f"
+    environment:
+      - CASSANDRA_USER=${CASSANDRA_USER:-cassandra}
+      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
+    volumes:
+      - ./.cassandradb:/var/lib/cassandra:rw
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "cqlsh",
+          "-u",
+          $CASSANDRA_USER,
+          "-p",
+          $CASSANDRA_PASSWORD,
+          "-e",
+          "describe keyspaces",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  jaeger:
+    image: ${JAEGER_IMG:-jaegertracing/jaeger:latest}
+    ports:
+      - "16686:16686" # Jaeger UI aka Jaeger query
+      - "4317:4317" # Collector, OpenTelemetry gRPC
+      - "4318:4318" # Collector, OpenTelemetry gRPC
+    environment:
+      - LOG_LEVEL=debug
+      - SPAN_STORAGE_TYPE=cassandra
+    volumes:
+      - ./configs/config.yml:/jaeger/config.yml
+      - ./configs/config-ui.json:/jaeger/config-ui.json
+    env_file:
+      - .env
+    profiles:
+      - default
+    command:
+      - "--config=/jaeger/config.yml"
+
+  nginx:
+    image: ${NGINX_IMG:-nginx:latest}
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+      - 443:443
+    profiles:
+      - nginx
+    depends_on:
+      - jaeger

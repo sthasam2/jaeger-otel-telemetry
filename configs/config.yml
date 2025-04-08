@@ -1,0 +1,105 @@
+# Reference: https://github.com/jaegertracing/jaeger/blob/main/cmd/jaeger/config-cassandra.yaml
+# Version: 2.5
+# Docs: https://www.jaegertracing.io/docs/2.5/configuration
+# Date: 8 April, 2025
+
+service:
+  extensions: [jaeger_storage, jaeger_query, healthcheckv2]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [jaeger_storage_exporter]
+  telemetry:
+    resource:
+      service.name: jaeger
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
+    logs:
+      level: debug
+
+extensions:
+  healthcheckv2:
+    use_v2: true
+    http:
+
+  # Docs: https://www.jaegertracing.io/docs/2.5/configuration/#jaeger-storage
+  jaeger_storage:
+    backends:
+      db:
+        cassandra:
+          schema:
+            keyspace: "${env:CASSANDRA_KEYSPACE:-true}"
+            create: "${env:CASSANDRA_CREATE_SCHEMA:-true}"
+            datacenter: dc1
+            trace_ttl: 48h
+          connection:
+            auth:
+              basic:
+                username: "${env:CASSANDRA_USER:-cassandra}"
+                password: "${env:CASSANDRA_PASSWORD:-cassandra}"
+            servers: "${env:CASSANDRA_HOST:-cassandra}"
+            tls:
+              insecure: true
+      db_archive:
+        cassandra:
+          schema:
+            keyspace: "${env:CASSANDRA_ARCHIVE_KEYSPACE:-true}"
+            create: "${env:CASSANDRA_CREATE_SCHEMA:-true}"
+            datacenter: dc1
+          connection:
+            auth:
+              basic:
+                username: "${env:CASSANDRA_USER:-cassandra}"
+                password: "${env:CASSANDRA_PASSWORD:-cassandra}"
+            servers: "${env:CASSANDRA_HOST:-cassandra}"
+            tls:
+              insecure: true
+
+    # metric_backends:
+    #   some_metrics_storage:
+    #     prometheus:
+    #       endpoint: http://prometheus:9090
+    #       normalize_calls: true
+    #       normalize_duration: true
+
+  # Docs: https://www.jaegertracing.io/docs/2.5/configuration/#jaeger-query
+  jaeger_query:
+    storage:
+      traces: db
+      traces_archive: db_archive
+    ui:
+      config_file: /jaeger/config-ui.json
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4317"
+      http:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4318"
+        cors:
+          allowed_origins: ["*"]
+          allowed_headers: ["*"]
+
+  jaeger:
+    protocols:
+      grpc:
+      thrift_binary:
+      thrift_compact:
+      thrift_http:
+
+# Docs: https://www.jaegertracing.io/docs/2.5/configuration/#processors
+processors:
+  batch:
+
+# Docs: https://www.jaegertracing.io/docs/2.5/configuration/#exporters
+exporters:
+  jaeger_storage_exporter:
+    trace_storage: db
