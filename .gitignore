@@ -1,0 +1,4 @@
+.*env
+
+.cassandradb/**
+!.cassandradb/.gitkeep
