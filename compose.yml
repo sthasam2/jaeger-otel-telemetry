@@ -52,6 +52,9 @@ services:
       - default
     command:
       - "--config=/jaeger/config.yml"
+    depends_on:
+      cassandra:
+        condition: service_healthy
 
   nginx:
     image: ${NGINX_IMG:-nginx:latest}
