@@ -1,6 +1,6 @@
 # Jaeger all-in-one OpenTelemetry
 
-Docker Compose setup for OTEL using Jaeger, OTEL Collector and Cassandra
+OTEL using Jaeger, OTEL Collector and Cassandra
 
 ## Useful Links
 
