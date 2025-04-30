@@ -1,7 +1,8 @@
-# Reference: https://github.com/jaegertracing/jaeger/blob/main/cmd/jaeger/config-cassandra.yaml
-# Version: 2.5
-# Docs: https://www.jaegertracing.io/docs/2.5/configuration
 # Date: 8 April, 2025
+# Version: 2.5
+# Reference: https://github.com/jaegertracing/jaeger/blob/main/cmd/jaeger/config-cassandra.yaml
+# Docs: https://www.jaegertracing.io/docs/2.5/configuration
+# More Info: Check https://www.jaegertracing.io/docs/next-release/cli/ for more flags
 
 service:
   extensions: [jaeger_storage, jaeger_query, healthcheckv2]
@@ -85,8 +86,10 @@ receivers:
       http:
         endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4318"
         cors:
-          allowed_origins: ["*"]
-          allowed_headers: ["*"]
+          allowed_origins:
+            - "http://localhost"
+          allowed_headers:
+            - "*"
 
   jaeger:
     protocols:
