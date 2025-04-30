@@ -37,9 +37,9 @@ services:
   jaeger:
     image: ${JAEGER_IMG:-jaegertracing/jaeger:latest}
     ports:
-      - "16686:16686" # Jaeger UI aka Jaeger query
-      - "4317:4317" # Collector, OpenTelemetry gRPC
-      - "4318:4318" # Collector, OpenTelemetry gRPC
+      - 16686:16686 # Jaeger UI aka Jaeger query
+      - 4317:4317 # Collector, OpenTelemetry gRPC
+      - 4318:4318 # Collector, OpenTelemetry HTTP
     environment:
       - LOG_LEVEL=debug
       - SPAN_STORAGE_TYPE=cassandra

@@ -1,7 +1,8 @@
-# Reference: https://github.com/jaegertracing/jaeger/blob/main/cmd/jaeger/config-cassandra.yaml
-# Version: 2.5
-# Docs: https://www.jaegertracing.io/docs/2.5/configuration
 # Date: 8 April, 2025
+# Version: 2.5
+# Reference: https://github.com/jaegertracing/jaeger/blob/main/cmd/jaeger/config-cassandra.yaml
+# Docs: https://www.jaegertracing.io/docs/2.5/configuration
+# More Info: Check https://www.jaegertracing.io/docs/next-release/cli/ for more flags
 
 service:
   extensions: [jaeger_storage, jaeger_query, healthcheckv2]
@@ -77,6 +78,9 @@ extensions:
     ui:
       config_file: /jaeger/config-ui.json
 
+# As per https://www.jaegertracing.io/docs/2.5/configuration/#introduction
+# > Jaeger can be configured via a YAML configuration file that uses the same format as the OpenTelemetry Collector 
+# Receiver Docs: https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md
 receivers:
   otlp:
     protocols:
