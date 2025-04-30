@@ -5,18 +5,15 @@
 
 services:
   cassandra:
-    image: ${CASSANDRA_IMG:-bitnami/cassandra:5.0.4}
+    image: ${CASSANDRA_IMG:-cassandra:5.0.3}
     ports:
       - "9042:9042"
       - "9160:9160"
     # We enable password authentication that defaults to cassandra/cassandra superuser / pwd.
     # https://cassandra.apache.org/doc/stable/cassandra/operating/security.html#authentication
-    # command: >
-    #   /bin/sh -c "echo 'authenticator: PasswordAuthenticator' >> /etc/cassandra/cassandra.yaml && docker-entrypoint.sh cassandra -f"
-    # But, this need not be done using bitnami images. We use bitnami images for easier configuration
+    command: >
+      /bin/sh -c "echo 'authenticator: PasswordAuthenticator' >> /etc/cassandra/cassandra.yaml && docker-entrypoint.sh cassandra -f"
     environment:
-      - CASSANDRA_AUTHENTICATOR=PasswordAuthenticator
-      - CASSANDRA_PASSWORD_SEEDER=yes
       - CASSANDRA_USER=${CASSANDRA_USER:-cassandra}
       - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
     volumes:
@@ -40,9 +37,9 @@ services:
   jaeger:
     image: ${JAEGER_IMG:-jaegertracing/jaeger:latest}
     ports:
-      - "16686:16686" # Jaeger UI aka Jaeger query
-      - "4317:4317" # Collector, OpenTelemetry gRPC
-      - "4318:4318" # Collector, OpenTelemetry gRPC
+      - 16686:16686 # Jaeger UI aka Jaeger query
+      - 4317:4317 # Collector, OpenTelemetry gRPC
+      - 4318:4318 # Collector, OpenTelemetry HTTP
     environment:
       - LOG_LEVEL=debug
       - SPAN_STORAGE_TYPE=cassandra
@@ -54,7 +51,7 @@ services:
     profiles:
       - default
     command:
-      - "--config=/jaeger/config.yml "
+      - "--config=/jaeger/config.yml"
     depends_on:
       cassandra:
         condition: service_healthy
