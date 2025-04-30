@@ -78,6 +78,9 @@ extensions:
     ui:
       config_file: /jaeger/config-ui.json
 
+# As per https://www.jaegertracing.io/docs/2.5/configuration/#introduction
+# > Jaeger can be configured via a YAML configuration file that uses the same format as the OpenTelemetry Collector 
+# Receiver Docs: https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md
 receivers:
   otlp:
     protocols:
@@ -86,10 +89,8 @@ receivers:
       http:
         endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4318"
         cors:
-          allowed_origins:
-            - "http://localhost"
-          allowed_headers:
-            - "*"
+          allowed_origins: ["*"]
+          allowed_headers: ["*"]
 
   jaeger:
     protocols:
