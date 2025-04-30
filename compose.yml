@@ -5,15 +5,18 @@
 
 services:
   cassandra:
-    image: ${CASSANDRA_IMG:-cassandra:5.0.3}
+    image: ${CASSANDRA_IMG:-bitnami/cassandra:5.0.4}
     ports:
       - "9042:9042"
       - "9160:9160"
     # We enable password authentication that defaults to cassandra/cassandra superuser / pwd.
     # https://cassandra.apache.org/doc/stable/cassandra/operating/security.html#authentication
-    command: >
-      /bin/sh -c "echo 'authenticator: PasswordAuthenticator' >> /etc/cassandra/cassandra.yaml && docker-entrypoint.sh cassandra -f"
+    # command: >
+    #   /bin/sh -c "echo 'authenticator: PasswordAuthenticator' >> /etc/cassandra/cassandra.yaml && docker-entrypoint.sh cassandra -f"
+    # But, this need not be done using bitnami images. We use bitnami images for easier configuration
     environment:
+      - CASSANDRA_AUTHENTICATOR=PasswordAuthenticator
+      - CASSANDRA_PASSWORD_SEEDER=yes
       - CASSANDRA_USER=${CASSANDRA_USER:-cassandra}
       - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
     volumes:
@@ -51,7 +54,7 @@ services:
     profiles:
       - default
     command:
-      - "--config=/jaeger/config.yml"
+      - "--config=/jaeger/config.yml "
     depends_on:
       cassandra:
         condition: service_healthy
