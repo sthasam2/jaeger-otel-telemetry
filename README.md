@@ -74,6 +74,35 @@ OTEL using Jaeger, OTEL Collector and Cassandra
   +          - <protocol>://<host>[:<port>] # example https://myhost.domain:8443
   ```
 
+  > [!Note]
+  > **Validating if cors is setting**
+  >
+  > Call a OPTION http request using curl and see the response headers
+  >
+  > ```bash
+  > curl -X OPTIONS \
+  > http://localhost:4318/v1/traces/ \
+  > -H 'Origin: http://<url>:<port>' \
+  > -H 'Access-Control-Request-Method: GET' \
+  > -H 'Access-Control-Request-Headers: Content-Type' \
+  > -i
+  > ```
+  >
+  > **Response**
+  >
+  > ```bash
+  > HTTP/1.1 204 No Content
+  > Access-Control-Allow-Credentials: true
+  > Access-Control-Allow-Headers: Content-Type
+  > Access-Control-Allow-Methods: GET
+  > Access-Control-Allow-Origin: http://<url>:<port>
+  > Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+  > Date: Wed, 30 Apr 2025 14:23:37 GMT
+  > ```
+  >
+  > The response should have your `Origin` as `Access-Control-Allow-Origin` header value
+  > > Access-Control-Allow-Origin: `http://<url>:<port>`
+
 #### 4. Run services
 
   ```bash
